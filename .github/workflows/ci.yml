@@ -34,7 +34,7 @@ jobs:
         shell: powershell
         run: |
           python -m pip install --disable-pip-version-check "pytest>=8,<9"
-          Install-Module Pester -RequiredVersion 4.10.1 -Scope CurrentUser -Force
+          Install-Module Pester -RequiredVersion 4.10.1 -Scope CurrentUser -Force -SkipPublisherCheck
           npm --prefix validator-node ci --ignore-scripts --registry=https://registry.npmjs.org
 
       - name: Python tests
