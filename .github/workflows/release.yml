@@ -1,0 +1,92 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*.*.*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-2025
+    timeout-minutes: 45
+    steps:
+      - name: Check out tagged source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: 3.12.10
+
+      - name: Set up Node 24
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 24.14.1
+
+      - name: Validate tag and install test tools
+        shell: powershell
+        run: |
+          $version = "${{ github.ref_name }}".Substring(1)
+          if ($version -notmatch '^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$') {
+            throw "release_tag_invalid"
+          }
+          python -m pip install --disable-pip-version-check "pytest>=8,<9"
+          Install-Module Pester -RequiredVersion 4.10.1 -Scope CurrentUser -Force
+          npm --prefix validator-node ci --ignore-scripts --registry=https://registry.npmjs.org
+
+      - name: Run all release gates
+        shell: powershell
+        run: |
+          $env:PYTHONPATH = "src"
+          $testBase = "C:\wct\pytest-$([Guid]::NewGuid().ToString('N'))"
+          python -m pytest -q --basetemp $testBase
+          npm --prefix validator-node test
+          npm --prefix validator-node audit --omit=dev --registry=https://registry.npmjs.org
+          Import-Module Pester -RequiredVersion 4.10.1
+          $scripts = @(
+            Get-ChildItem tests\powershell\*.Tests.ps1 |
+              ForEach-Object FullName
+          ) + @(
+            Get-ChildItem vss-helper\tests\*.Tests.ps1 |
+              ForEach-Object FullName
+          )
+          $result = Invoke-Pester -Script $scripts -PassThru
+          if ($result.FailedCount -ne 0) { throw "pester_failed" }
+          python tools/privacy_scan.py --repo .
+          python tools/runtime_boundary_scan.py --repo .
+          git diff --check
+          if (git status --porcelain=v1) { throw "dirty_release_tree" }
+
+      - name: Build and verify Windows package
+        shell: powershell
+        run: |
+          $version = "${{ github.ref_name }}".Substring(1)
+          .\scripts\Build-Release.ps1 -Version $version `
+            -OutputDirectory release -Repository "${{ github.repository }}"
+          python tools/verify_release.py `
+            --archive "release\weflow-chat-$version-win-x64.zip" `
+            --sha256 "release\weflow-chat-$version-win-x64.zip.sha256" `
+            --version $version
+          $command = Get-Content release\install-command.txt -Raw
+          if ($command -match 'Invoke-Expression|\biex\b|ScriptBlock]::Create') {
+            throw "install_command_unsafe"
+          }
+
+      - name: Publish GitHub Release
+        shell: powershell
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $version = "${{ github.ref_name }}".Substring(1)
+          gh release create "${{ github.ref_name }}" `
+            --verify-tag --title "weflow-chat $version" `
+            --notes "Manual, offline Windows x64 database refresh. See README and install-command.txt." `
+            "release\weflow-chat-$version-win-x64.zip" `
+            "release\weflow-chat-$version-win-x64.zip.sha256" `
+            "release\weflow-chat-$version-install.ps1" `
+            "release\weflow-chat-$version-install.ps1.sha256" `
+            "release\install-command.txt"
