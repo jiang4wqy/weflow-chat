@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=75,<76"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "weflow-chat"
+version = "0.1.0"
+description = "Offline, fail-closed WeFlow chat database refresh for Windows"
+requires-python = ">=3.12,<3.13"
+license = { file = "LICENSE" }
+classifiers = [
+    "Environment :: Win32 (MS Windows)",
+    "Programming Language :: Python :: 3.12",
+    "Private :: Do Not Upload",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8,<9"]
+
+[project.scripts]
+weflow-chat = "weflow_chat.cli:main"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-p no:cacheprovider"
