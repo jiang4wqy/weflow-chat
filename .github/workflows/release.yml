@@ -43,6 +43,7 @@ jobs:
         run: |
           $env:PYTHONPATH = "src"
           $testBase = "C:\wct\pytest-$([Guid]::NewGuid().ToString('N'))"
+          [IO.Directory]::CreateDirectory([IO.Path]::GetDirectoryName($testBase)) | Out-Null
           python -m pytest -q --basetemp $testBase
           npm --prefix validator-node test
           npm --prefix validator-node audit --omit=dev --registry=https://registry.npmjs.org

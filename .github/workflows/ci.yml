@@ -42,6 +42,7 @@ jobs:
         run: |
           $env:PYTHONPATH = "src"
           $testBase = "C:\wct\pytest-$([Guid]::NewGuid().ToString('N'))"
+          [IO.Directory]::CreateDirectory([IO.Path]::GetDirectoryName($testBase)) | Out-Null
           python -m pytest -q --basetemp $testBase
 
       - name: Node tests and audit
