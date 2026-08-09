@@ -2,5 +2,7 @@
 *.cmd text eol=crlf
 *.ps1 text eol=crlf
 *.psm1 text eol=crlf
+vss-helper/*.ps1 text eol=lf
+vss-helper/*.psm1 text eol=lf
 *.png binary
 *.zip binary
