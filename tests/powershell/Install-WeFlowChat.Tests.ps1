@@ -113,7 +113,7 @@ Describe "user-level WeFlowChat package installer" {
         $target = Join-Path $TestDrive "Programs-first-fail\WeFlowChat"
         $desktop = Join-Path $TestDrive "Desktop-first-fail"
         [IO.Directory]::CreateDirectory($desktop) | Out-Null
-        $shortcut = Join-Path $desktop "刷新 WeFlow 聊天记录.lnk"
+        $shortcut = Join-Path $desktop (Get-WeFlowChatShortcutName)
         $failAfterShortcut = {
             param($root, $path)
             Set-Content -LiteralPath $shortcut -Value "created"
@@ -158,7 +158,8 @@ Describe "user-level WeFlowChat package installer" {
         $state.Shortcut.Arguments | Should Be ""
         $state.Shortcut.TargetPath | Should Be (
             Join-Path $target "scripts\Run-WeFlowChatInstalled.cmd")
-        $path | Should Be (Join-Path $desktop "刷新 WeFlow 聊天记录.lnk")
+        $path | Should Be (
+            Join-Path $desktop (Get-WeFlowChatShortcutName))
     }
 
     It "uses only package-relative Python and Node in the installed wrapper" {

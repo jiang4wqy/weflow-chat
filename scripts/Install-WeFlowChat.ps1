@@ -166,6 +166,16 @@ function New-WeFlowChatShortcutObject {
     return $shell.CreateShortcut($Path)
 }
 
+function Get-WeFlowChatShortcutName {
+    return -join @(
+        [char]0x5237, [char]0x65B0,
+        " WeFlow ",
+        [char]0x804A, [char]0x5929,
+        [char]0x8BB0, [char]0x5F55,
+        ".lnk"
+    )
+}
+
 function Install-WeFlowChatShortcut {
     param(
         [Parameter(Mandatory)][string]$InstallRoot,
@@ -177,7 +187,7 @@ function Install-WeFlowChatShortcut {
     if (-not (Test-Path -LiteralPath $DesktopPath -PathType Container)) {
         throw "desktop_path_invalid"
     }
-    $shortcutPath = Join-Path $DesktopPath "刷新 WeFlow 聊天记录.lnk"
+    $shortcutPath = Join-Path $DesktopPath (Get-WeFlowChatShortcutName)
     $contract = Get-WeFlowChatShortcutContract $InstallRoot
     $shortcut = & $ShortcutFactory $shortcutPath
     $shortcut.TargetPath = $contract.TargetPath
@@ -256,7 +266,7 @@ function Install-WeFlowChatPackage {
                 Move-Item -LiteralPath $backup -Destination $target
             } elseif (-not $hadExisting) {
                 $shortcutPath = Join-Path $DesktopPath `
-                    "刷新 WeFlow 聊天记录.lnk"
+                    (Get-WeFlowChatShortcutName)
                 if (Test-Path -LiteralPath $shortcutPath -PathType Leaf) {
                     Remove-Item -LiteralPath $shortcutPath -Force
                 }
