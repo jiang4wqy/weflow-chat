@@ -44,8 +44,11 @@ jobs:
         shell: powershell
         run: |
           $env:PYTHONPATH = "src"
-          $testBase = "C:\wct\pytest-$([Guid]::NewGuid().ToString('N'))"
-          [IO.Directory]::CreateDirectory([IO.Path]::GetDirectoryName($testBase)) | Out-Null
+          $testRoot = "C:\wct\release-$([Guid]::NewGuid().ToString('N'))"
+          [IO.Directory]::CreateDirectory($testRoot) | Out-Null
+          $env:TEMP = $testRoot
+          $env:TMP = $testRoot
+          $testBase = Join-Path $testRoot "pytest"
           python -m pytest -q --basetemp $testBase
           if ($LASTEXITCODE -ne 0) { throw "python_tests_failed" }
           npm --prefix validator-node test
