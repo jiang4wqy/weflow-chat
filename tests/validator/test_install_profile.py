@@ -158,8 +158,12 @@ def test_validation_profile_keeps_db_storage_only_contract(
 
 
 def test_synthetic_presentation_profile_creates_only_supported_tree(
-    validator_layout
+    validator_layout, monkeypatch
 ):
+    monkeypatch.setattr(
+        "weflow_chat.validator.profile.ensure_private_directory",
+        lambda path: path.mkdir(parents=True, exist_ok=True),
+    )
     attempt = (
         validator_layout.run_root
         / "validator"

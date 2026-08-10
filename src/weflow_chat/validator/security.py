@@ -237,6 +237,7 @@ $p=[System.IO.Path]::GetFullPath(
 $u=[System.Security.Principal.WindowsIdentity]::GetCurrent().User
 $s=New-Object System.Security.Principal.SecurityIdentifier('S-1-5-18')
 $acl=New-Object System.Security.AccessControl.DirectorySecurity
+$acl.SetOwner($u)
 $acl.SetAccessRuleProtection($true,$false)
 $inherit=[System.Security.AccessControl.InheritanceFlags]'ContainerInherit,ObjectInherit'
 $prop=[System.Security.AccessControl.PropagationFlags]::None

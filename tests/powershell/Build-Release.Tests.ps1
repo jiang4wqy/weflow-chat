@@ -61,6 +61,7 @@ Describe "Windows release builder" {
             [IO.Directory]::CreateDirectory([IO.Path]::GetDirectoryName($license)) |
                 Out-Null
             Set-Content -LiteralPath $license -Value "synthetic-license"
+            "dependency-noise"
         }
 
         $result = New-WeFlowChatRelease -RepositoryRoot $repo `
@@ -68,7 +69,8 @@ Describe "Windows release builder" {
             -PythonArchive $archives.Python `
             -PythonSha256 $archives.PythonSha256 `
             -NodeArchive $archives.Node -NodeSha256 $archives.NodeSha256 `
-            -DependencyInstaller $dependencies -RuntimeProbe { param($root) } `
+            -DependencyInstaller $dependencies `
+            -RuntimeProbe { param($root) "runtime-noise" } `
             -SkipCleanCheck
 
         Test-Path -LiteralPath $result.Archive -PathType Leaf |

@@ -41,8 +41,8 @@ def test_task4_final_copied_module_contracts_are_exact():
             "2800CF8946B2C8846EBE8F29938C822C8CB96D092D19B8F6303BDE4878720CC3",
         ),
                 Path("dist-electron/worker-gateway.cjs"): (
-                    27588,
-                    "F6298EE2BE85F9A1B94D46F3A5608E6C602EB743FB741F301A217284DA4788D1",
+                    27645,
+                    "109E9C4D29124947BCC6DF124710FE9D70F28C6543FB81B1D60F63FCE42AFEBE",
         ),
     }
     for relative, contract in expected.items():

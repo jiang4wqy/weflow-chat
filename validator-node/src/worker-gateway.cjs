@@ -46,15 +46,16 @@ const databasePath = (entry, dbStorageDir) => {
   if (typeof entry !== "string" || !entry) {
     throw new Error("worker_database_path_rejected");
   }
-  const root = fs.realpathSync.native(path.resolve(dbStorageDir));
-  const candidate = path.resolve(root, entry);
-  if (!inside(candidate, root)) {
+  const requestedRoot = path.resolve(dbStorageDir);
+  const candidate = path.resolve(requestedRoot, entry);
+  if (!inside(candidate, requestedRoot)) {
     throw new Error("worker_database_path_rejected");
   }
   const info = fs.lstatSync(candidate);
   if (info.isSymbolicLink() || !info.isFile()) {
     throw new Error("worker_database_path_rejected");
   }
+  const root = fs.realpathSync.native(requestedRoot);
   const absolute = fs.realpathSync.native(candidate);
   if (!inside(absolute, root)) throw new Error("worker_database_path_rejected");
   return {absolute, relative: path.relative(root, absolute).replaceAll("\\", "/")};

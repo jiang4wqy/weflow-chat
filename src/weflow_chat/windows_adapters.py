@@ -4,7 +4,6 @@ import ctypes
 from ctypes import wintypes
 import hashlib
 import json
-import locale
 import os
 from pathlib import Path
 import re
@@ -46,6 +45,8 @@ def _ps_json(script: str, *arguments: str):
             _PS_ARGUMENT_ENV_PREFIX + str(index)
         ] = value
     wrapped_script = (
+        "$__utf8=New-Object System.Text.UTF8Encoding($false);"
+        "$OutputEncoding=$__utf8;[Console]::OutputEncoding=$__utf8;"
         "$__count=[int]"
         "[Environment]::GetEnvironmentVariable("
         f"'{_PS_ARGUMENT_ENV_PREFIX}COUNT',"
@@ -67,7 +68,7 @@ def _ps_json(script: str, *arguments: str):
         ],
         check=False,
         text=True,
-        encoding=locale.getencoding(),
+        encoding="utf-8",
         errors="strict",
         capture_output=True,
         env=environment,

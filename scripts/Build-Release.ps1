@@ -239,8 +239,8 @@ function New-WeFlowChatRelease {
         Get-ChildItem -LiteralPath $nodeSource -Force | Copy-Item `
             -Destination $nodeRoot -Recurse
 
-        & $DependencyInstaller (Join-Path $package "validator-node")
-        & $RuntimeProbe $package
+        & $DependencyInstaller (Join-Path $package "validator-node") | Out-Null
+        & $RuntimeProbe $package | Out-Null
         Write-ReleaseManifest -PackageRoot $package -Version $Version
 
         Compress-Archive -LiteralPath $package -DestinationPath $asset `

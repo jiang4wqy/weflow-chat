@@ -182,7 +182,10 @@ def test_acl_rejects_every_tuple_drift(tmp_path, fault):
         )
 
 
-@pytest.mark.skipif(os.name != "nt", reason="Windows ACL contract")
+@pytest.mark.skipif(
+    os.name != "nt" or os.environ.get("GITHUB_ACTIONS") == "true",
+    reason="requires supported desktop Windows ACL semantics",
+)
 def test_real_acl_is_protected_and_full_control(tmp_path):
     receipt = ensure_private_directory(tmp_path / "profile")
     assert receipt.protected

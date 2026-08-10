@@ -34,8 +34,10 @@ jobs:
         shell: powershell
         run: |
           python -m pip install --disable-pip-version-check "pytest>=8,<9"
+          if ($LASTEXITCODE -ne 0) { throw "pytest_install_failed" }
           Install-Module Pester -RequiredVersion 4.10.1 -Scope CurrentUser -Force -SkipPublisherCheck
           npm --prefix validator-node ci --ignore-scripts --registry=https://registry.npmjs.org
+          if ($LASTEXITCODE -ne 0) { throw "node_install_failed" }
 
       - name: Python tests
         shell: powershell
@@ -44,12 +46,15 @@ jobs:
           $testBase = "C:\wct\pytest-$([Guid]::NewGuid().ToString('N'))"
           [IO.Directory]::CreateDirectory([IO.Path]::GetDirectoryName($testBase)) | Out-Null
           python -m pytest -q --basetemp $testBase
+          if ($LASTEXITCODE -ne 0) { throw "python_tests_failed" }
 
       - name: Node tests and audit
         shell: powershell
         run: |
           npm --prefix validator-node test
+          if ($LASTEXITCODE -ne 0) { throw "node_tests_failed" }
           npm --prefix validator-node audit --omit=dev --registry=https://registry.npmjs.org
+          if ($LASTEXITCODE -ne 0) { throw "node_audit_failed" }
 
       - name: PowerShell tests
         shell: powershell
@@ -69,6 +74,9 @@ jobs:
         shell: powershell
         run: |
           python tools/privacy_scan.py --repo .
+          if ($LASTEXITCODE -ne 0) { throw "privacy_scan_failed" }
           python tools/runtime_boundary_scan.py --repo .
+          if ($LASTEXITCODE -ne 0) { throw "runtime_boundary_scan_failed" }
           git diff --check
+          if ($LASTEXITCODE -ne 0) { throw "diff_check_failed" }
           if (git status --porcelain=v1) { throw "dirty_ci_tree" }

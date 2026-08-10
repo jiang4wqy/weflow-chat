@@ -37,10 +37,10 @@ test("Task 4 entry bytes match the JavaScript copied-module contract",
 test("Task 4 worker bytes match the JavaScript copied-module contract",
      async () => {
   const expected =
-    "F6298EE2BE85F9A1B94D46F3A5608E6C602EB743FB741F301A217284DA4788D1";
+    "109E9C4D29124947BCC6DF124710FE9D70F28C6543FB81B1D60F63FCE42AFEBE";
   const raw = fs.readFileSync(
     path.join(__dirname, "..", "src", "worker-gateway.cjs"));
-  assert.equal(raw.length, 27588);
+  assert.equal(raw.length, 27645);
   assert.equal(require("node:crypto").createHash("sha256").update(raw)
     .digest("hex").toUpperCase(), expected);
   const patcher = await import("../src/extract-and-patch.mjs");

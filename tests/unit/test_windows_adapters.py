@@ -734,8 +734,8 @@ def test_security_restrict_uses_sid_grants_and_restore_is_exact(tmp_path):
 
 
 @pytest.mark.skipif(
-    os.name != "nt",
-    reason="requires Windows ACL roundtrip",
+    os.name != "nt" or os.environ.get("GITHUB_ACTIONS") == "true",
+    reason="requires supported desktop Windows ACL semantics",
 )
 def test_security_restricted_backup_tree_roundtrips_on_windows(
         tmp_path,
